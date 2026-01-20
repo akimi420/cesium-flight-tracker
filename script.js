@@ -9,7 +9,7 @@ viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
     139.7671,
     35.6812,
-    2000000
+     300000 
   )
 });
 
