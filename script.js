@@ -3,3 +3,11 @@ Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain()
 });
+viewer.camera.flyTo({
+  destination: Cesium.Cartesian3.fromDegrees(
+    139.7671, // 経度（東京）
+    35.6812,  // 緯度
+    1500000   // 高さ（m）
+  )
+});
+
