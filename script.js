@@ -11,3 +11,20 @@ viewer.camera.flyTo({
   )
 });
 
+const position = Cesium.Cartesian3.fromDegrees(
+  139.7671,
+  35.6812,
+  10000
+);
+
+const airplane = viewer.entities.add({
+  name: "Airplane",
+  position: position,
+  model: {
+    uri: "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
+    minimumPixelSize: 64
+  }
+});
+
+viewer.trackedEntity = airplane;
+
