@@ -5,27 +5,32 @@ Cesium.Ion.defaultAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMGFlMzRjZi0xMTg2LTQyMWItYjEyOS02YWNlZTk4NDY2OTUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3Njg4OTUxNzd9.thBsRrp8DmJxjSndUnz6rSJTf0VtEfqGSRE-OWEdznA";
 
 // ===============================
-// Viewer
+// route.js 読み込み
+// ===============================
+import { japanRoute, createJapanFlightPath } from "./route.js";
+
+// ===============================
+// Viewer（★ 地球が必ず見える構成）
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
+  imageryProvider: Cesium.createWorldImagery(), // ★ 必須
   terrain: Cesium.Terrain.fromWorldTerrain(),
-
-  // ★ 地球が見えるかどうかの本体
-  imageryProvider: Cesium.createWorldImagery(),
-
   shouldAnimate: true,
   timeline: true,
   animation: true
 });
 
+// 地形の陰影（地上感アップ）
+viewer.scene.globe.enableLighting = true;
+
 // ===============================
-// 初期カメラ（東京を斜め上から）
+// 初期カメラ（日本全体）
 // ===============================
 viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
-    139.7671,
-    35.6812,
-    80000
+    138.0,   // 日本の中央付近
+    37.0,
+    2500000  // 日本全体が見える高さ
   ),
   orientation: {
     heading: 0,
@@ -38,9 +43,11 @@ viewer.camera.setView({
 // Time settings
 // ===============================
 const start = Cesium.JulianDate.now();
+const secondsPerPoint = 25;
+
 const stop = Cesium.JulianDate.addSeconds(
   start,
-  120,
+  secondsPerPoint * (japanRoute.length - 1),
   new Cesium.JulianDate()
 );
 
@@ -51,42 +58,16 @@ viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
 viewer.clock.multiplier = 1;
 
 // ===============================
-// Flight path（高度が変わる）
+// 日本一周フライトパス生成
 // ===============================
-const flightPath = new Cesium.SampledPositionProperty();
-
-flightPath.addSample(
-  start,
-  Cesium.Cartesian3.fromDegrees(
-    139.7671,
-    35.6812,
-    300   // 300m
-  )
-);
-
-flightPath.addSample(
-  Cesium.JulianDate.addSeconds(start, 60, new Cesium.JulianDate()),
-  Cesium.Cartesian3.fromDegrees(
-    140.1,
-    35.9,
-    3000  // 3000m
-  )
-);
-
-flightPath.addSample(
-  stop,
-  Cesium.Cartesian3.fromDegrees(
-    140.5,
-    36.2,
-    8000  // 8000m
-  )
-);
+const flightPath = createJapanFlightPath(start, secondsPerPoint);
 
 // ===============================
-// Airplane
+// 飛行機エンティティ
 // ===============================
 const airplane = viewer.entities.add({
-  name: "Flight",
+  name: "Japan Round Trip Flight",
+
   position: flightPath,
   orientation: new Cesium.VelocityOrientationProperty(flightPath),
 
@@ -94,25 +75,74 @@ const airplane = viewer.entities.add({
     uri:
       "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
     minimumPixelSize: 120,
-    maximumScale: 500
+    maximumScale: 400
   },
 
   path: {
     resolution: 1,
-    material: Cesium.Color.CYAN,
+    material: Cesium.Color.ORANGE,
     width: 3
   }
 });
 
 // ===============================
-// Tracking Camera
+// 都市マーカー & ラベル（GIS感UP）
+// ===============================
+japanRoute.forEach((p) => {
+  viewer.entities.add({
+    position: Cesium.Cartesian3.fromDegrees(p.lon, p.lat, 0),
+    label: {
+      text: p.name,
+      font: "14px sans-serif",
+      fillColor: Cesium.Color.WHITE,
+      outlineColor: Cesium.Color.BLACK,
+      outlineWidth: 2,
+      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+      pixelOffset: new Cesium.Cartesian2(0, -10)
+    },
+    point: {
+      pixelSize: 6,
+      color: Cesium.Color.RED
+    }
+  });
+});
+
+// ===============================
+// 追跡カメラ（地上寄り・安定）
 // ===============================
 airplane.viewFrom = new Cesium.Cartesian3(
-  -1500, // 後ろ
-  600,   // 横
-  800    // 上
+  -800, // 後ろ
+  0,
+  300   // 上（低すぎると地面に刺さる）
 );
 
+// 少し待ってから追跡開始（★ 安定）
 setTimeout(() => {
   viewer.trackedEntity = airplane;
-}, 1000);
+}, 1500);
+
+// ===============================
+// デバッグ操作
+// ===============================
+
+// Cキー：追跡 ON / OFF
+window.addEventListener("keydown", (e) => {
+  if (e.key === "c") {
+    viewer.trackedEntity =
+      viewer.trackedEntity ? undefined : airplane;
+  }
+});
+
+// Rキー：日本全体に戻る
+window.addEventListener("keydown", (e) => {
+  if (e.key === "r") {
+    viewer.trackedEntity = undefined;
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(
+        138.0,
+        37.0,
+        2500000
+      )
+    });
+  }
+});
