@@ -5,7 +5,7 @@ Cesium.Ion.defaultAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMGFlMzRjZi0xMTg2LTQyMWItYjEyOS02YWNlZTk4NDY2OTUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3Njg4OTUxNzd9.thBsRrp8DmJxjSndUnz6rSJTf0VtEfqGSRE-OWEdznA";
 
 // ===============================
-// Viewer
+// Viewer（余計な機能は切る）
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain(),
@@ -15,23 +15,23 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 });
 
 // ===============================
-// 初期カメラ（東京・低空）
+// 初期カメラ（東京・確実に地表が見える）
 // ===============================
 viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
-    139.7671,
+    139.7671, // 東京
     35.6812,
-    1000   // ← これ以下だと「地球」にならない
+    3000      // ★ 地球にならない安全高度
   ),
   orientation: {
     heading: 0,
-    pitch: Cesium.Math.toRadians(-25),
+    pitch: Cesium.Math.toRadians(-35),
     roll: 0
   }
 });
 
 // ===============================
-// 時間
+// 時間設定
 // ===============================
 const start = Cesium.JulianDate.now();
 const stop = Cesium.JulianDate.addSeconds(
@@ -47,33 +47,54 @@ viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
 viewer.clock.multiplier = 0.5;
 
 // ===============================
-// 飛行ルート（低空）
+// 飛行ルート（地形を突き抜けない高さ）
 // ===============================
 const path = new Cesium.SampledPositionProperty();
+
 path.addSample(
   start,
-  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 300)
+  Cesium.Cartesian3.fromDegrees(
+    139.7671,
+    35.6812,
+    800   // ★ 地面から 800m
+  )
 );
+
 path.addSample(
   stop,
-  Cesium.Cartesian3.fromDegrees(139.9, 35.75, 300)
+  Cesium.Cartesian3.fromDegrees(
+    139.9,
+    35.75,
+    800
+  )
 );
 
 // ===============================
-// 飛行機
+// 飛行機エンティティ
 // ===============================
 const plane = viewer.entities.add({
+  name: "Airplane",
   position: path,
   orientation: new Cesium.VelocityOrientationProperty(path),
+
+  // ★ 地面基準（超重要）
+  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+
   model: {
     uri:
       "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
-    minimumPixelSize: 80
+    minimumPixelSize: 100
+  },
+
+  path: {
+    resolution: 1,
+    material: Cesium.Color.CYAN,
+    width: 3
   }
 });
 
 // ===============================
-// ★ 第三者視点カメラ（元の安定版）
+// ★ 安定した第三者視点（マイクラ視点）
 // ===============================
 viewer.scene.preUpdate.addEventListener(() => {
   const time = viewer.clock.currentTime;
@@ -82,22 +103,22 @@ viewer.scene.preUpdate.addEventListener(() => {
 
   if (!pos || !ori) return;
 
-  // 後ろ＆少し上（←これが「戻る」感覚）
-  const offset = new Cesium.Cartesian3(-40, 0, 15);
+  // 後ろ・少し上
+  const offset = new Cesium.Cartesian3(-80, 0, 30);
 
   const transform = Cesium.Matrix4.fromRotationTranslation(
     Cesium.Matrix3.fromQuaternion(ori),
     pos
   );
 
-  const camPos = Cesium.Matrix4.multiplyByPoint(
+  const cameraPos = Cesium.Matrix4.multiplyByPoint(
     transform,
     offset,
     new Cesium.Cartesian3()
   );
 
   viewer.camera.setView({
-    destination: camPos,
+    destination: cameraPos,
     orientation: {
       pitch: Cesium.Math.toRadians(-15),
       roll: 0
