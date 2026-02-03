@@ -1,14 +1,14 @@
 // ===============================
 // Cesium Ion Token
 // ===============================
-Cesium.Ion.defaultAccessToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2N2Y0MTNkNy03NzVhLTQ2MTYtYmRhZi1mMDMzOGU0OTMxODUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjM5ODl9.TJ0wCBXLhw4QVD6RW8C-YTmPkU5n8Gu9UJXg3g3h1ts";
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2N2Y0MTNkNy03NzVhLTQ2MTYtYmRhZi1mMDMzOGU0OTMxODUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjM5ODl9.TJ0wCBXLhw4QVD6RW8C-YTmPkU5n8Gu9UJXg3g3h1ts";
 
 // ===============================
 // Viewer 初期化
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain(), // 世界地形
+  imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }), // 衛星画像
   shouldAnimate: true,
   timeline: true,
   animation: true
@@ -16,12 +16,9 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 
 // ===============================
 // 初期カメラ（東京・低空）
-// ===============================
 viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
-    139.7671, // 東京
-    35.6812,
-    3000      // 地上より少し上
+    139.7671, 35.6812, 500 // 地上より少し上
   ),
   orientation: {
     heading: 0,
@@ -32,7 +29,6 @@ viewer.camera.setView({
 
 // ===============================
 // 時間設定
-// ===============================
 const start = Cesium.JulianDate.now();
 const stop = Cesium.JulianDate.addSeconds(start, 60, new Cesium.JulianDate());
 
@@ -40,18 +36,16 @@ viewer.clock.startTime = start.clone();
 viewer.clock.stopTime = stop.clone();
 viewer.clock.currentTime = start.clone();
 viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-viewer.clock.multiplier = 0.5;
+viewer.clock.multiplier = 0.5; // ゆっくり
 
 // ===============================
 // 飛行ルート（低空）
-// ===============================
 const flightPath = new Cesium.SampledPositionProperty();
-flightPath.addSample(start, Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 150));
-flightPath.addSample(stop, Cesium.Cartesian3.fromDegrees(139.9, 35.75, 150));
+flightPath.addSample(start, Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 300));
+flightPath.addSample(stop, Cesium.Cartesian3.fromDegrees(139.9, 35.75, 400));
 
 // ===============================
 // 飛行機エンティティ
-// ===============================
 const plane = viewer.entities.add({
   name: "Airplane",
   position: flightPath,
@@ -59,8 +53,8 @@ const plane = viewer.entities.add({
   heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND, // 地面基準
   model: {
     uri: "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
-    minimumPixelSize: 100,
-    maximumScale: 500
+    minimumPixelSize: 80,
+    maximumScale: 300
   },
   path: {
     resolution: 1,
@@ -71,15 +65,14 @@ const plane = viewer.entities.add({
 
 // ===============================
 // 第三者視点カメラ（手動追従）
-// ===============================
 viewer.scene.preUpdate.addEventListener(() => {
   const t = viewer.clock.currentTime;
   const pos = plane.position.getValue(t);
   const ori = plane.orientation.getValue(t);
   if (!pos || !ori) return;
 
-  // カメラオフセット（後ろ・少し上）
-  const offset = new Cesium.Cartesian3(-50, 0, 20);
+  // カメラオフセット（後ろ・少し上・横）
+  const offset = new Cesium.Cartesian3(-200, 0, 100);
 
   const transform = Cesium.Matrix4.fromRotationTranslation(
     Cesium.Matrix3.fromQuaternion(ori),
@@ -99,7 +92,6 @@ viewer.scene.preUpdate.addEventListener(() => {
 
 // ===============================
 // 追跡開始（少し待ってから）
-// ===============================
 setTimeout(() => {
   viewer.trackedEntity = plane;
 }, 1000);
