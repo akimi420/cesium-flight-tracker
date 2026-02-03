@@ -1,135 +1,28 @@
-// ===============================
-// Cesium Ion Token
-// ===============================
-Cesium.Ion.defaultAccessToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMGFlMzRjZi0xMTg2LTQyMWItYjEyOS02YWNlZTk4NDY2OTUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3Njg4OTUxNzd9.thBsRrp8DmJxjSndUnz6rSJTf0VtEfqGSRE-OWEdznA";
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>Cesium Flight</title>
 
-// ===============================
-// Viewer
-// ===============================
-const viewer = new Cesium.Viewer("cesiumContainer", {
-  terrain: Cesium.Terrain.fromWorldTerrain(),
-  shouldAnimate: true,
-  timeline: true,
-  animation: true
-});
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+  <link
+    href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css"
+    rel="stylesheet"
+  />
 
-// ===============================
-// 初期カメラ（東京を斜めから）
-// ===============================
-viewer.camera.setView({
-  destination: Cesium.Cartesian3.fromDegrees(
-    139.7671,
-    35.6812,
-    80000
-  ),
-  orientation: {
-    heading: 0,
-    pitch: Cesium.Math.toRadians(-45),
-    roll: 0
-  }
-});
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
 
-// ===============================
-// Time settings
-// ===============================
-const start = Cesium.JulianDate.now();
-const stop = Cesium.JulianDate.addSeconds(
-  start,
-  120,
-  new Cesium.JulianDate()
-);
-
-viewer.clock.startTime = start.clone();
-viewer.clock.stopTime = stop.clone();
-viewer.clock.currentTime = start.clone();
-viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-viewer.clock.multiplier = 1;
-
-// ===============================
-// Flight path（★ 高度が変わる）
-// ===============================
-const flightPath = new Cesium.SampledPositionProperty();
-
-// 低空スタート（地面すれすれ）
-flightPath.addSample(
-  start,
-  Cesium.Cartesian3.fromDegrees(
-    139.7671,
-    35.6812,
-    100   // ★ 100m
-  )
-);
-
-// 上昇
-flightPath.addSample(
-  Cesium.JulianDate.addSeconds(start, 60, new Cesium.JulianDate()),
-  Cesium.Cartesian3.fromDegrees(
-    140.1,
-    35.9,
-    2000  // ★ 2000m
-  )
-);
-
-// さらに上昇
-flightPath.addSample(
-  stop,
-  Cesium.Cartesian3.fromDegrees(
-    140.5,
-    36.2,
-    5000  // ★ 5000m
-  )
-);
-
-// ===============================
-// Airplane Entity（決定版）
-// ===============================
-const airplane = viewer.entities.add({
-  name: "Flight",
-
-  position: flightPath,
-
-  // ★ 地面基準の高さにする（超重要）
-  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-
-  orientation: new Cesium.VelocityOrientationProperty(flightPath),
-
-  model: {
-    uri:
-      "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
-
-   // minimumPixelSize: 100,
-    maximumScale: 400
-  },
-
-  // 飛行ルート
-  path: {
-    resolution: 1,
-    material: Cesium.Color.YELLOW,
-    width: 4
-  }
-});
-
-// ===============================
-// Tracking Camera（高さが分かる角度）
-// ===============================
-airplane.viewFrom = new Cesium.Cartesian3(
-  -600,  // 後ろ
-  400,   // 横（★ 高さが分かる）
-  300    // 上
-);
-
-// 少し待ってから追跡開始
-setTimeout(() => {
-  viewer.trackedEntity = airplane;
-}, 1000);
-
-// ===============================
-// デバッグ：Cキーで追跡ON/OFF
-// ===============================
-window.addEventListener("keydown", (e) => {
-  if (e.key === "c") {
-    viewer.trackedEntity =
-      viewer.trackedEntity ? undefined : airplane;
-  }
-});
+<body>
+  <div id="cesiumContainer"></div>
+  <script src="script.js"></script>
+</body>
+</html>
