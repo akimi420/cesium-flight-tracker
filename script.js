@@ -9,6 +9,10 @@ Cesium.Ion.defaultAccessToken =
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain(),
+
+  // ★ 地球が見えるかどうかの本体
+  imageryProvider: Cesium.createWorldImagery(),
+
   shouldAnimate: true,
   timeline: true,
   animation: true
