@@ -5,11 +5,13 @@ Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOi
 // Viewer 初期化（地形付き）
 // Viewer 初期化
 const viewer = new Cesium.Viewer("cesiumContainer", {
-  terrainProvider: Cesium.CesiumTerrainProvider.fromWorldTerrain(), // ← UMD版
-  imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }),   // 衛星画像
-  shouldAnimate: true,
-  timeline: true,
-  animation: true
+    terrainProvider: new Cesium.CesiumTerrainProvider({
+        url: Cesium.IonResource.fromAssetId(1) // 世界地形
+    }),
+    imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }), // 衛星画像
+    shouldAnimate: true,
+    timeline: true,
+    animation: true
 });
 
 // ===============================
