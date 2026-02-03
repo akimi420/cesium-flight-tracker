@@ -53,7 +53,7 @@ const flightPath = new Cesium.SampledPositionProperty();
 
 flightPath.addSample(
   start,
-  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 50) // 50m
+  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 200) // 50m
 );
 
 flightPath.addSample(
