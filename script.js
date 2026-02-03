@@ -1,32 +1,31 @@
 // ===============================
-// Cesium Ion Token（あなたのトークン）
+// Cesium Ion Token
 // ===============================
 Cesium.Ion.defaultAccessToken =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMGFlMzRjZi0xMTg2LTQyMWItYjEyOS02YWNlZTk4NDY2OTUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3Njg4OTUxNzd9.thBsRrp8DmJxjSndUnz6rSJTf0VtEfqGSRE-OWEdznA";
 
 // ===============================
-// Viewer（★ これが安定構成）
+// Viewer
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain(),
   shouldAnimate: true,
   timeline: true,
-  animation: true,
-  baseLayerPicker: false
+  animation: true
 });
 
 // ===============================
-// 初期カメラ（東京上空・地球が必ず見える）
+// 初期カメラ（東京を地上近くから）
 // ===============================
 viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
     139.7671,
     35.6812,
-    150000
+    5000 // ★ 地上が見える高さ
   ),
   orientation: {
     heading: 0,
-    pitch: Cesium.Math.toRadians(-45),
+    pitch: Cesium.Math.toRadians(-30),
     roll: 0
   }
 });
@@ -37,7 +36,7 @@ viewer.camera.setView({
 const start = Cesium.JulianDate.now();
 const stop = Cesium.JulianDate.addSeconds(
   start,
-  300,
+  120,
   new Cesium.JulianDate()
 );
 
@@ -45,48 +44,33 @@ viewer.clock.startTime = start.clone();
 viewer.clock.stopTime = stop.clone();
 viewer.clock.currentTime = start.clone();
 viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-viewer.clock.multiplier = 0.2; // ★ 重要：速すぎ防止
+viewer.clock.multiplier = 0.2; // ★ ゆっくり
 
 // ===============================
-// 日本一周ルート（地上すれすれ）
+// 飛行ルート（地上すれすれ）
 // ===============================
 const flightPath = new Cesium.SampledPositionProperty();
 
-// 東京
 flightPath.addSample(
   start,
-  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 200)
+  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 50) // 50m
 );
 
-// 仙台
 flightPath.addSample(
   Cesium.JulianDate.addSeconds(start, 60, new Cesium.JulianDate()),
-  Cesium.Cartesian3.fromDegrees(140.8719, 38.2682, 300)
+  Cesium.Cartesian3.fromDegrees(139.9, 35.75, 80)
 );
 
-// 札幌
-flightPath.addSample(
-  Cesium.JulianDate.addSeconds(start, 120, new Cesium.JulianDate()),
-  Cesium.Cartesian3.fromDegrees(141.3545, 43.0621, 400)
-);
-
-// 大阪
-flightPath.addSample(
-  Cesium.JulianDate.addSeconds(start, 200, new Cesium.JulianDate()),
-  Cesium.Cartesian3.fromDegrees(135.5023, 34.6937, 300)
-);
-
-// 福岡
 flightPath.addSample(
   stop,
-  Cesium.Cartesian3.fromDegrees(130.4017, 33.5902, 200)
+  Cesium.Cartesian3.fromDegrees(140.1, 35.85, 100)
 );
 
 // ===============================
 // 飛行機エンティティ
 // ===============================
 const airplane = viewer.entities.add({
-  name: "Japan Flight",
+  name: "Airplane",
   position: flightPath,
   orientation: new Cesium.VelocityOrientationProperty(flightPath),
 
@@ -94,36 +78,35 @@ const airplane = viewer.entities.add({
     uri:
       "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
     minimumPixelSize: 120,
-    maximumScale: 400
+    maximumScale: 300
   },
 
   path: {
     resolution: 1,
-    material: Cesium.Color.YELLOW,
-    width: 4
+    material: Cesium.Color.CYAN,
+    width: 3
   }
 });
 
 // ===============================
-// 追跡カメラ（地上感）
+// ★ マイクラ第三者視点（超重要）
 // ===============================
 airplane.viewFrom = new Cesium.Cartesian3(
-  -250, // 後ろ
-  0,
-  100   // 上（低い）
+  -60, // 後ろ
+  0,   // 横
+  20   // 上（低い）
 );
 
-// 少し待ってから追跡開始
-setTimeout(() => {
-  viewer.trackedEntity = airplane;
-}, 3000);
-
-// ===============================
-// デバッグ：Cキーで追跡ON/OFF
-// ===============================
-window.addEventListener("keydown", (e) => {
-  if (e.key === "c") {
-    viewer.trackedEntity =
-      viewer.trackedEntity ? undefined : airplane;
+// カメラ角度を固定（酔わない）
+viewer.scene.preUpdate.addEventListener(() => {
+  if (viewer.trackedEntity === airplane) {
+    viewer.camera.pitch = Cesium.Math.toRadians(-15);
   }
 });
+
+// ===============================
+// 追跡開始（少し待つ）
+// ===============================
+setTimeout(() => {
+  viewer.trackedEntity = airplane;
+}, 2000);
