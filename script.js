@@ -21,7 +21,7 @@ viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
     139.7671,
     35.6812,
-    5000 // ★ 地上が見える高さ
+    100 // ★ 地上が見える高さ
   ),
   orientation: {
     heading: 0,
