@@ -13,13 +13,11 @@ import { japanRoute, createJapanFlightPath } from "./route.js";
 // Viewer（★ 地球が必ず見える構成）
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
-  imageryProvider: Cesium.createWorldImagery(), // ★ 必須
   terrain: Cesium.Terrain.fromWorldTerrain(),
   shouldAnimate: true,
   timeline: true,
   animation: true
 });
-
 // 地形の陰影（地上感アップ）
 viewer.scene.globe.enableLighting = true;
 
