@@ -22,12 +22,10 @@ viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
     139.7671,
     35.6812,
-    5000 // ★ 地上が見える高さ
+    3000
   ),
   orientation: {
-    heading: 0,
-    pitch: Cesium.Math.toRadians(-30),
-    roll: 0
+    pitch: Cesium.Math.toRadians(-40)
   }
 });
 
