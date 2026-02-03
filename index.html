@@ -12,26 +12,21 @@
   />
 
   <style>
-    html, body {
+    html, body, #cesiumContainer {
       width: 100%;
       height: 100%;
       margin: 0;
       padding: 0;
       overflow: hidden;
     }
-
-    #cesiumContainer {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
   </style>
 </head>
 
 <body>
+  <!-- ★ id完全一致 -->
   <div id="cesiumContainer"></div>
 
-  <!-- ★ script.js はここで1回だけ -->
+  <!-- ★ bodyの一番最後で1回だけ -->
   <script src="script.js"></script>
 </body>
 </html>
