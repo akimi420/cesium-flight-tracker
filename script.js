@@ -2,7 +2,7 @@
 // Cesium Ion Token
 // ===============================
 Cesium.Ion.defaultAccessToken =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJmMGFlMzRjZi0xMTg2LTQyMWItYjEyOS02YWNlZTk4NDY2OTUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3Njg4OTUxNzd9.thBsRrp8DmJxjSndUnz6rSJTf0VtEfqGSRE-OWEdznA";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2N2Y0MTNkNy03NzVhLTQ2MTYtYmRhZi1mMDMzOGU0OTMxODUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjM5ODl9.TJ0wCBXLhw4QVD6RW8C-YTmPkU5n8Gu9UJXg3g3h1ts";
 
 // ===============================
 // Viewer 初期化
