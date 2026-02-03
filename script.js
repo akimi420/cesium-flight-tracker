@@ -1,3 +1,6 @@
+
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwYjAyOTVmZi02NzdmLTQ2ZDMtYWFmMi1jMjUxYTNiNDdiNzgiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjQzNjd9.foHyM6_aGyiCUDXCyacpCkwmL9gjVCvbLciiiaazOCk";
+
 // ===============================
 // Viewer 初期化（地形付き）
 const viewer = new Cesium.Viewer("cesiumContainer", {
