@@ -4,13 +4,13 @@
 Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwYjAyOTVmZi02NzdmLTQ2ZDMtYWFmMi1jMjUxYTNiNDdiNzgiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjQzNjd9.foHyM6_aGyiCUDXCyacpCkwmL9gjVCvbLciiiaazOCk";
 
 // ===============================
-// Viewer 初期化（地形＋衛星画像）
+// Viewer 初期化（地形 + 衛星画像）
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrainProvider: new Cesium.CesiumTerrainProvider({
-    url: Cesium.IonResource.fromAssetId(1) // 世界地形
+    url: Cesium.IonResource.fromAssetId(1) // World Terrain
   }),
-  imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }), // 衛星画像
+  imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }), // Bing / World Imagery
   shouldAnimate: true,
   timeline: true,
   animation: true
@@ -20,17 +20,18 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 // 初期カメラ（東京・低空）
 // ===============================
 viewer.camera.setView({
-  destination: Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 500),
+  destination: Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 1000),
   orientation: {
-    heading: 0,
+    heading: Cesium.Math.toRadians(0),
     pitch: Cesium.Math.toRadians(-25),
     roll: 0
   }
 });
 
 // ===============================
-// 時間設定
+// 時計設定（Flight Tracker のチュートリアルに合わせる）
 // ===============================
+// 60秒でループ設定
 const start = Cesium.JulianDate.now();
 const stop = Cesium.JulianDate.addSeconds(start, 60, new Cesium.JulianDate());
 
@@ -41,63 +42,47 @@ viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
 viewer.clock.multiplier = 0.5;
 
 // ===============================
-// 飛行ルート（低空）
+// Flight Path（低空ルート）
 // ===============================
 const flightPath = new Cesium.SampledPositionProperty();
-flightPath.addSample(start, Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 150));
-flightPath.addSample(stop, Cesium.Cartesian3.fromDegrees(139.9, 35.75, 150));
+
+// 低空サンプル（例: 東京から近くまで）
+flightPath.addSample(
+  start,
+  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 200) // 200m
+);
+flightPath.addSample(
+  Cesium.JulianDate.addSeconds(start, 30, new Cesium.JulianDate()),
+  Cesium.Cartesian3.fromDegrees(140.0, 35.8, 300) // 300m
+);
+flightPath.addSample(
+  stop,
+  Cesium.Cartesian3.fromDegrees(140.2, 36.0, 400) // 400m
+);
 
 // ===============================
-// 飛行機エンティティ
+// 飛行機モデルの追加
 // ===============================
-const plane = viewer.entities.add({
-  name: "Airplane",
+const airplane = viewer.entities.add({
+  name: "Flight",
   position: flightPath,
   orientation: new Cesium.VelocityOrientationProperty(flightPath),
-  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
   model: {
-    uri: "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
+    uri:
+      "https://cesium.com/downloads/cesiumjs/releases/1.138/Build/Cesium/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
     minimumPixelSize: 80,
     maximumScale: 300
   },
   path: {
     resolution: 1,
     material: Cesium.Color.CYAN,
-    width: 3
+    width: 2
   }
 });
 
 // ===============================
-// 第三者視点カメラ（手動追従）
-// ===============================
-viewer.scene.preUpdate.addEventListener(() => {
-  const t = viewer.clock.currentTime;
-  const pos = plane.position.getValue(t);
-  const ori = plane.orientation.getValue(t);
-  if (!pos || !ori) return;
-
-  // 後ろ・少し上・横にオフセット
-  const offset = new Cesium.Cartesian3(-50, 0, 20);
-
-  const transform = Cesium.Matrix4.fromRotationTranslation(
-    Cesium.Matrix3.fromQuaternion(ori),
-    pos
-  );
-
-  const camPos = Cesium.Matrix4.multiplyByPoint(transform, offset, new Cesium.Cartesian3());
-
-  viewer.camera.setView({
-    destination: camPos,
-    orientation: {
-      pitch: Cesium.Math.toRadians(-15),
-      roll: 0
-    }
-  });
-});
-
-// ===============================
-// 追跡開始（少し待つ）
+// カメラ追従（公式 Flight Tracker と同様の trackedEntity）
 // ===============================
 setTimeout(() => {
-  viewer.trackedEntity = plane;
+  viewer.trackedEntity = airplane;
 }, 1000);
