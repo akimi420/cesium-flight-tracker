@@ -72,6 +72,10 @@ flightPath.addSample(
 const airplane = viewer.entities.add({
   name: "Airplane",
   position: flightPath,
+
+  // ★ 地面基準にする（最重要）
+  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
+
   orientation: new Cesium.VelocityOrientationProperty(flightPath),
 
   model: {
