@@ -95,4 +95,4 @@ airplane.viewFrom = new Cesium.Cartesian3(
   50    // 少し上
 );
 
-viewer.trackedEntity = airplane;
+//viewer.trackedEntity = airplane;
