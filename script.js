@@ -15,18 +15,13 @@ const viewer = new Cesium.Viewer("cesiumContainer", {
 });
 
 // ===============================
-// 建物（そのまま）
-// ===============================
-viewer.scene.primitives.add(Cesium.createOsmBuildings());
-
-// ===============================
-// 初期カメラ（東京・かなり近い）
+// 初期カメラ（東京を地上近くから）
 // ===============================
 viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
     139.7671,
     35.6812,
-    1200   // ← 低め
+    5000 // ★ 地上が見える高さ
   ),
   orientation: {
     heading: 0,
@@ -49,73 +44,69 @@ viewer.clock.startTime = start.clone();
 viewer.clock.stopTime = stop.clone();
 viewer.clock.currentTime = start.clone();
 viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP;
-viewer.clock.multiplier = 0.3;
+viewer.clock.multiplier = 0.2; // ★ ゆっくり
 
 // ===============================
-// 飛行ルート（地面すれすれ・安定）
+// 飛行ルート（地上すれすれ）
 // ===============================
 const flightPath = new Cesium.SampledPositionProperty();
 
 flightPath.addSample(
   start,
-  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 120)
+  Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 50) // 50m
 );
 
 flightPath.addSample(
   Cesium.JulianDate.addSeconds(start, 60, new Cesium.JulianDate()),
-  Cesium.Cartesian3.fromDegrees(139.9, 35.75, 150)
+  Cesium.Cartesian3.fromDegrees(139.9, 35.75, 80)
 );
 
 flightPath.addSample(
   stop,
-  Cesium.Cartesian3.fromDegrees(140.1, 35.85, 180)
+  Cesium.Cartesian3.fromDegrees(140.1, 35.85, 100)
 );
 
 // ===============================
-// 飛行機
+// 飛行機エンティティ
 // ===============================
 const airplane = viewer.entities.add({
   name: "Airplane",
   position: flightPath,
-
-  // ★ 地面基準（これだけ残す）
-  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
-
   orientation: new Cesium.VelocityOrientationProperty(flightPath),
 
   model: {
     uri:
       "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
-    minimumPixelSize: 90,
-    maximumScale: 250
+    minimumPixelSize: 120,
+    maximumScale: 300
   },
 
   path: {
     resolution: 1,
     material: Cesium.Color.CYAN,
-    width: 2
+    width: 3
   }
 });
 
 // ===============================
-// ★ マイクラ第三者視点（確実に近い）
+// ★ マイクラ第三者視点（超重要）
 // ===============================
 airplane.viewFrom = new Cesium.Cartesian3(
-  -8,   // 後ろ 8m
-  0,
-  3     // 上 3m
+  -60, // 後ろ
+  0,   // 横
+  20   // 上（低い）
 );
 
-// 視点固定（遠くならない）
+// カメラ角度を固定（酔わない）
 viewer.scene.preUpdate.addEventListener(() => {
   if (viewer.trackedEntity === airplane) {
-    viewer.camera.pitch = Cesium.Math.toRadians(-20);
+    viewer.camera.pitch = Cesium.Math.toRadians(-15);
   }
 });
 
 // ===============================
-// 追跡開始
+// 追跡開始（少し待つ）
 // ===============================
 setTimeout(() => {
   viewer.trackedEntity = airplane;
-}, 1500);
+}, 2000);
