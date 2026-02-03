@@ -9,10 +9,11 @@ Cesium.Ion.defaultAccessToken =
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrain: Cesium.Terrain.fromWorldTerrain(),
-  shouldAnimate: true,
-  timeline: true,
-  animation: true
+  shouldAnimate: true
 });
+
+// ★ 建物を追加
+viewer.scene.primitives.add(Cesium.createOsmBuildings());
 
 // ===============================
 // 初期カメラ（東京を地上近くから）
