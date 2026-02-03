@@ -1,7 +1,7 @@
 // ===============================
 // Cesium Ion Token
 // ===============================
-Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2N2Y0MTNkNy03NzVhLTQ2MTYtYmRhZi1mMDMzOGU0OTMxODUiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjM5ODl9.TJ0wCBXLhw4QVD6RW8C-YTmPkU5n8Gu9UJXg3g3h1ts";
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwYjAyOTVmZi02NzdmLTQ2ZDMtYWFmMi1jMjUxYTNiNDdiNzgiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjQzNjd9.foHyM6_aGyiCUDXCyacpCkwmL9gjVCvbLciiiaazOCk";
 
 // ===============================
 // Viewer 初期化
