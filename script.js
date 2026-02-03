@@ -1,20 +1,23 @@
 // ===============================
-// Viewer 初期化（サンプル地形＆衛星画像）
+// Cesium Ion Token
+// ===============================
+Cesium.Ion.defaultAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwYjAyOTVmZi02NzdmLTQ2ZDMtYWFmMi1jMjUxYTNiNDdiNzgiLCJpZCI6MzgxMDgzLCJpYXQiOjE3NzAxMjQzNjd9.foHyM6_aGyiCUDXCyacpCkwmL9gjVCvbLciiiaazOCk";
+
+// ===============================
+// Viewer 初期化（地形＋衛星画像）
 // ===============================
 const viewer = new Cesium.Viewer("cesiumContainer", {
   terrainProvider: new Cesium.CesiumTerrainProvider({
-    url: "https://assets.cesium.com/1/tileset.json" // サンプル地形
+    url: Cesium.IonResource.fromAssetId(1) // 世界地形
   }),
-  imageryProvider: new Cesium.UrlTemplateImageryProvider({
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-  }),
+  imageryProvider: new Cesium.IonImageryProvider({ assetId: 2 }), // 衛星画像
   shouldAnimate: true,
   timeline: true,
   animation: true
 });
 
 // ===============================
-// 初期カメラ（東京上空低空）
+// 初期カメラ（東京・低空）
 // ===============================
 viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(139.7671, 35.6812, 500),
@@ -51,6 +54,7 @@ const plane = viewer.entities.add({
   name: "Airplane",
   position: flightPath,
   orientation: new Cesium.VelocityOrientationProperty(flightPath),
+  heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND,
   model: {
     uri: "https://cesium.com/downloads/cesiumjs/releases/1.114/Apps/SampleData/models/CesiumAir/Cesium_Air.glb",
     minimumPixelSize: 80,
@@ -72,7 +76,7 @@ viewer.scene.preUpdate.addEventListener(() => {
   const ori = plane.orientation.getValue(t);
   if (!pos || !ori) return;
 
-  // カメラオフセット（後ろ・少し上）
+  // 後ろ・少し上・横にオフセット
   const offset = new Cesium.Cartesian3(-50, 0, 20);
 
   const transform = Cesium.Matrix4.fromRotationTranslation(
