@@ -18,7 +18,7 @@ viewer.camera.setView({
   destination: Cesium.Cartesian3.fromDegrees(
     139.7671,
     35.6812,
-    300000   // 東京がはっきり見える高度
+    100000   // 東京がはっきり見える高度
   )
 });
 
